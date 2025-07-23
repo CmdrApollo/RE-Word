@@ -104,7 +104,10 @@ def main(stdscr: curses.window):
                 stdscr.addstr(1, 1, "what to enter to play:")
                 stdscr.addstr(2, 1, "<ENTRY NO.> + [SPACE] + <WORD>")
 
-            stdscr.addstr(height, 1, input_string)
+            try:
+                stdscr.addstr(height, 1, input_string)
+            except:
+                input_string = ""
 
             all_correct = True
 
@@ -156,7 +159,8 @@ def main(stdscr: curses.window):
                 elif key in (curses.KEY_BACKSPACE, 127, 8):
                     input_string = input_string[:-1]
                 elif 0 <= key <= 255 and len(input_string) < 12:
-                    input_string += chr(key)
+                    if chr(key).isalnum() or chr(key) in ' ':
+                        input_string += chr(key)
 
             prev_time = t
         except KeyboardInterrupt:
