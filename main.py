@@ -60,9 +60,14 @@ for _ in range(limit):
     bot = Bot(words.pop(), engine)
     bot.solve()
     if bot.guesses[-1][1] == "GGGGG":
-        if (len(bot.guesses) > 3 or bot.guesses[0][1].count('_') > 3) and args.easy:
-            seed = random.randint(0, pow(2, 16) - 1)
-            continue
+        if args.easy:
+            if len(bot.guesses) > 3 or bot.guesses[0][1].count('_') > 3:
+                seed = random.randint(0, pow(2, 16) - 1)
+                continue
+        else:
+            if len(bot.guesses) < 4:
+                seed = random.randint(0, pow(2, 16) - 1)
+                continue
         break
 
 width, height = 30, 15
