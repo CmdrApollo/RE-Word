@@ -29,16 +29,26 @@ def parse_args():
         help="Specify how much time you have to solve the puzzle."
     )
 
+    parser.add_argument('-e', '--easy', action='store_true', help='Enable easy mode')
+
     return parser.parse_args()
 
 args = parse_args()
+
+if args.easy:
+    if args.seed is not None:
+        print("You cannot specify a seed or puzzle when playing in easy mode.")
+        exit()
+    if args.puzzle is not None:
+        print("You cannot specify a seed or puzzle when playing in easy mode.")
+        exit()
 
 words = open('words.txt', 'r').read().splitlines()
 all_words = words.copy()
 
 if args.seed is not None:
     seed = args.seed
-else: 
+else:
     seed = random.randint(0, pow(2, 16) - 1)
 
 while True:
@@ -49,6 +59,9 @@ while True:
     bot = Bot(words.pop(), engine)
     bot.solve()
     if bot.guesses[-1][1] == "GGGGG":
+        if (len(bot.guesses) > 3 or bot.guesses[0][1] == "_____") and args.easy:
+            seed = random.randint(0, pow(2, 16) - 1)
+            continue
         break
 
 width, height = 30, 15
@@ -94,7 +107,7 @@ def main(stdscr: curses.window):
     while True:
         try:
             if timer < 0:
-                show_text = f"Sorry! You failed to finsih\nthis puzzle in time. Your\npuzzle was \"{bot.guesses[-1][0]}\" and your\nseed was {seed}. Press any\nkey to exit."
+                show_text = f"Sorry! You failed to finish\nthis puzzle in time. Your\npuzzle was \"{bot.guesses[-1][0]}\" and your\nseed was {seed}. Press any\nkey to exit."
                 break
 
             stdscr.clear()
