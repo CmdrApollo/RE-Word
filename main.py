@@ -51,7 +51,8 @@ if args.seed is not None:
 else:
     seed = random.randint(0, pow(2, 16) - 1)
 
-while True:
+limit = 1000
+for _ in range(limit):
     random.seed(seed)
     words = all_words.copy()
     random.shuffle(words)
@@ -59,7 +60,7 @@ while True:
     bot = Bot(words.pop(), engine)
     bot.solve()
     if bot.guesses[-1][1] == "GGGGG":
-        if (len(bot.guesses) > 3 or bot.guesses[0][1] == "_____") and args.easy:
+        if (len(bot.guesses) > 3 or bot.guesses[0][1].count('_') > 3) and args.easy:
             seed = random.randint(0, pow(2, 16) - 1)
             continue
         break
