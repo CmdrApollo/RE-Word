@@ -89,6 +89,8 @@ def main(stdscr: curses.window):
 
     show_text = ""
 
+    idx = 0
+
     while True:
         try:
             if timer < 0:
@@ -105,7 +107,7 @@ def main(stdscr: curses.window):
                 stdscr.addstr(2, 1, "<ENTRY NO.> + [SPACE] + <WORD>")
 
             try:
-                stdscr.addstr(height, 1, input_string)
+                stdscr.addstr(height, 1, input_string + ('█' if int(timer * 2) & 1 else ' '))
             except:
                 input_string = ""
 
@@ -114,6 +116,8 @@ def main(stdscr: curses.window):
             ox = width // 2 - 3
             oy = 3
             for i, (guess, seq) in enumerate(bot.guesses):
+                if i == idx:
+                    stdscr.addstr(oy + i * 2 + 0, ox - 2, '> ')
                 stdscr.addstr(oy + i * 2 + 0, ox, str(i + 1) + ' ')
                 col = Colors.GREEN if player_guesses[i] == guess else Colors.RED
                 new_seq = engine.sequence(player_guesses[i], guess)
@@ -155,6 +159,10 @@ def main(stdscr: curses.window):
                                     g = input_string.split(' ')[1]
                                     if len(g) == 5 and g.isalpha() and g.lower() in all_words:
                                         player_guesses[idx] = g.lower()
+                        else:
+                            g = input_string.strip()
+                            if len(g) == 5 and g.isalpha() and g.lower() in all_words:
+                                player_guesses[idx] = g.lower()
                     input_string = ""
                 elif key in (curses.KEY_BACKSPACE, 127, 8):
                     input_string = input_string[:-1]
