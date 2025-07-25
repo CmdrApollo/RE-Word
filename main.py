@@ -31,6 +31,8 @@ def parse_args():
 
     parser.add_argument('-e', '--easy', action='store_true', help='Enable easy mode')
 
+    parser.add_argument('-s', '--slow', action='store_true', help='Make it so that the game does not constantly refresh the terminal.')
+
     return parser.parse_args()
 
 args = parse_args()
@@ -74,10 +76,13 @@ width, height = 30, 15
 
 def main(stdscr: curses.window):
     curses.start_color()
-    curses.echo()
+    if args.slow:
+        curses.echo()
+    else:
+        curses.noecho()
     curses.curs_set(0)
 
-    stdscr.nodelay(True)
+    stdscr.nodelay(not args.slow)
     stdscr.resize(height + 2, width + 2)
 
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK    )
@@ -125,11 +130,9 @@ def main(stdscr: curses.window):
                 stdscr.addstr(1, 1, "what to enter to play:")
                 stdscr.addstr(2, 1, "<ENTRY NO.> + [SPACE] + <WORD>")
 
-            try:
+            if not args.slow:
                 stdscr.addstr(height, 1, input_string + ('█' if int(timer * 2) & 1 else ' '))
-            except:
-                input_string = ""
-
+    
             all_correct = True
 
             ox = width // 2 - 3
@@ -166,28 +169,43 @@ def main(stdscr: curses.window):
             stdscr.refresh()
 
             stdscr.move(height, 1)
-            key = stdscr.getch()
-            if key != -1:
-                if key in (curses.KEY_ENTER, 10, 13):
-                    input_string = input_string.strip()
-                    if len(input_string):
-                        if input_string[0] in "12345":
-                            idx = int(input_string[0]) - 1
-                            if 0 <= idx < len(player_guesses) - 1:
-                                if len(input_string.split(' ')) == 2:
-                                    g = input_string.split(' ')[1]
-                                    if len(g) == 5 and g.isalpha() and g.lower() in all_words:
-                                        player_guesses[idx] = g.lower()
-                        else:
-                            g = input_string.strip()
+            if args.slow:
+                input_string = stdscr.getstr().decode().strip()
+                if input_string[0] in "12345":
+                    idx = int(input_string[0]) - 1
+                    if 0 <= idx < len(player_guesses) - 1:
+                        if len(input_string.split(' ')) == 2:
+                            g = input_string.split(' ')[1]
                             if len(g) == 5 and g.isalpha() and g.lower() in all_words:
                                 player_guesses[idx] = g.lower()
-                    input_string = ""
-                elif key in (curses.KEY_BACKSPACE, 127, 8):
-                    input_string = input_string[:-1]
-                elif 0 <= key <= 255 and len(input_string) < 12:
-                    if chr(key).isalnum() or chr(key) in ' ':
-                        input_string += chr(key)
+                else:
+                    g = input_string.strip()
+                    if len(g) == 5 and g.isalpha() and g.lower() in all_words:
+                        player_guesses[idx] = g.lower()
+                input_string = ""
+            else:
+                key = stdscr.getch()
+                if key != -1:
+                    if key in (curses.KEY_ENTER, 10, 13):
+                        input_string = input_string.strip()
+                        if len(input_string):
+                            if input_string[0] in "12345":
+                                idx = int(input_string[0]) - 1
+                                if 0 <= idx < len(player_guesses) - 1:
+                                    if len(input_string.split(' ')) == 2:
+                                        g = input_string.split(' ')[1]
+                                        if len(g) == 5 and g.isalpha() and g.lower() in all_words:
+                                            player_guesses[idx] = g.lower()
+                            else:
+                                g = input_string.strip()
+                                if len(g) == 5 and g.isalpha() and g.lower() in all_words:
+                                    player_guesses[idx] = g.lower()
+                        input_string = ""
+                    elif key in (curses.KEY_BACKSPACE, 127, 8):
+                        input_string = input_string[:-1]
+                    elif 0 <= key <= 255 and len(input_string) < 12:
+                        if chr(key).isalnum() or chr(key) in ' ':
+                            input_string += chr(key)
 
             prev_time = t
         except KeyboardInterrupt:
